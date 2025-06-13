@@ -9,10 +9,11 @@
 - Поддержка Docker для простого развертывания
 - Структурированное логирование с использованием zerolog
 - Корректное завершение работы
+- Утилита нагрузочного тестирования
 
 ## Требования
 
-- Go 1.x
+- Go 1.24
 - Docker и Docker Compose
 - PostgreSQL (при локальном запуске)
 
@@ -44,28 +45,46 @@ go mod download
 go run cmd/main.go
 ```
 
-## Структура проекта
+## Нагрузочное тестирование
 
-```
-.
-├── cmd/
-│   └── main.go         # Точка входа приложения
-├── internal/
-│   └── app/           # Логика приложения
-├── Dockerfile         # Конфигурация Docker
-├── docker-compose.yml # Конфигурация Docker Compose
-├── go.mod            # Определение Go модуля
-└── go.sum            # Контрольные суммы Go модуля
-```
-
-## Разработка
-
-Проект использует Go модули для управления зависимостями. Для добавления новых зависимостей:
-
+Для проведения нагрузочного тестирования сервиса используйте утилиту в директории `cmd/loadtest`:
 ```bash
-go get github.com/example/package
+go run cmd/loadtest/main.go [flags]
 ```
 
-## Лицензия
+### Флаги нагрузочного тестирования
 
-[Добавьте вашу лицензию здесь] 
+- `-url` - базовый URL тестируемого сервиса (по умолчанию "http://localhost:3000")
+- `-requests` - общее количество запросов для каждого эндпоинта (по умолчанию 1000)
+- `-concurrency` - количество одновременных запросов (по умолчанию 10)
+- `-banner` - ID баннера для тестирования (по умолчанию 5)
+
+### Пример запуска теста
+```bash
+go run cmd/loadtest/main.go -url="http://localhost:3000" -requests=1000 -concurrency=10 -banner=5
+```
+
+### Вывод результатов тестирования
+
+Утилита выводит статистику отдельно для каждого эндпоинта:
+```aiignore
+Click Endpoint Results:
+Total Requests: 1000
+Successful Requests: 1000
+Failed Requests: 0
+RPS: 814.28
+Min Latency: 1.597375ms
+Max Latency: 46.211375ms
+Average Latency: 8.117849ms
+
+Stats Endpoint Results:
+Total Requests: 1000
+Successful Requests: 1000
+Failed Requests: 0
+RPS: 814.25
+Min Latency: 1.502792ms
+Max Latency: 21.228875ms
+Average Latency: 4.144466ms
+
+Total Test Duration: 1.228238584s
+```
