@@ -40,6 +40,11 @@ func NewStorage(dbURL string) (storage.Storage, error) {
 		return nil, err
 	}
 
+	db.SetMaxOpenConns(100)
+	db.SetMaxIdleConns(50)
+	db.SetConnMaxLifetime(time.Hour)
+	db.SetConnMaxIdleTime(30 * time.Minute)
+
 	if err := WaitForDatabase(db, 30, time.Second); err != nil {
 		return nil, fmt.Errorf("database is not ready: %w", err)
 	}

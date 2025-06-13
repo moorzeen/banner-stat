@@ -3,7 +3,6 @@ package api
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/moorzeen/banner-stat/internal/model"
@@ -20,7 +19,14 @@ type API struct {
 
 func New(storage storage.Storage) *API {
 	a := &API{
-		http:    fiber.New(),
+		http: fiber.New(fiber.Config{
+			ServerHeader: "",
+			WriteTimeout: 5 * time.Second,
+			ReadTimeout:  5 * time.Second,
+			IdleTimeout:  10 * time.Second,
+			BodyLimit:    4 * 1024,
+		}),
+
 		storage: storage,
 	}
 
@@ -33,10 +39,10 @@ func New(storage storage.Storage) *API {
 	a.http.Use(recover.New())
 	a.http.Use(logger.New())
 
-	a.http.Use(limiter.New(limiter.Config{
-		Max:        1000,
-		Expiration: time.Second,
-	}))
+	//a.http.Use(limiter.New(limiter.Config{
+	//	Max:        1000,
+	//	Expiration: time.Second,
+	//}))
 
 	a.setupRoutes()
 
